@@ -32,14 +32,26 @@ Figure 2: Structure of the overall review.
 이 섹션에서는 먼저 암시적 및 명시적 방사장을 포함한 방사장에 대한 간략한 공식을 제공합니다 (2.1절). 2.2절은 관련 렌더링 알고리즘 및 용어와의 연결을 추가로 설정합니다. 방사장, 장면 재구성 및 표현, 렌더링 방법에 대한 포괄적인 개요는 훌륭한 설문조사 [29]–[33]를 참조하십시오.
 
 ### 2.1 방사장
-* 암시적 방사장. 암시적 방사장은 장면의 기하학을 명시적으로 정의하지 않고 장면의 빛 분포를 나타냅니다. 딥러닝 시대에는 신경망이 종종 연속적인 볼륨 장면 표현을 학습하는 데 사용됩니다 [34], [35]. 가장 대표적인 예는 NeRF [12]입니다. NeRF (그림 3a)에서는 하나 이상의 MLP가 공간 좌표 (x, y, z) 및 시야 방향 (θ, ϕ) 세트를 색상 c 및 볼륨 밀도 σ에 매핑하는 데 사용됩니다. (c, σ) ← MLP(x, y, z, θ, ϕ). (1) 이 형식은 복잡한 장면의 미분 가능하고 압축된 표현을 허용하지만, 볼륨 레이 마칭으로 인한 높은 계산 부하가 드는 경우가 많습니다. 일반적으로 색상 c는 방향 의존적이지만, 볼륨 밀도 σ는 그렇지 않습니다 [12].
+* 암시적 방사장. 암시적 방사장은 장면의 기하학을 명시적으로 정의하지 않고 장면의 빛 분포를 나타냅니다. 딥러닝 시대에는 신경망이 종종 연속적인 볼륨 장면 표현을 학습하는 데 사용됩니다 [34], [35]. 가장 대표적인 예는 NeRF [12]입니다. NeRF (그림 3a)에서는 하나 이상의 MLP가 공간 좌표 (x, y, z) 및 시야 방향 (θ, ϕ) 세트를 색상 c 및 볼륨 밀도 σ에 매핑하는 데 사용됩니다. 
+  
+  (c, σ) ← MLP(x, y, z, θ, ϕ). (1) 
+  
+  이 형식은 복잡한 장면의 미분 가능하고 압축된 표현을 허용하지만, 볼륨 레이 마칭으로 인한 높은 계산 부하가 드는 경우가 많습니다. 일반적으로 색상 c는 방향 의존적이지만, 볼륨 밀도 σ는 그렇지 않습니다 [12].
 
-* 명시적 방사장. 명시적 방사장은 복셀 그리드 또는 점 집합과 같은 이산 공간 구조에서 빛 분포를 직접 나타냅니다 [36], [37]. 이 구조의 각 요소는 해당 위치에 대한 방사 정보(radiance information)를 저장합니다. 이를 통해 방사 데이터에 직접적이고 종종 더 빠르게 접근할 수 있지만, 메모리 사용량이 많고 해상도가 낮을 수 있습니다. 암시적 방사장과 유사하게 명시적 방사장은 다음과 같이 작성됩니다. (c, σ) ← DataStructure(x, y, z, θ, ϕ), (2) 여기서 DataStructure는 볼륨, 포인트 클라우드 등의 형식일 수 있습니다. DataStructure는 방향 색상을 두 가지 주요 방식으로 인코딩합니다. 하나는 고차원 특징을 인코딩하여 나중에 경량 MLP에 의해 디코딩되는 방식입니다. 다른 하나는 구면 조화 함수(spherical harmonics) 또는 구면 가우시안(spherical Gaussians)과 같은 방향 기저 함수의 계수를 직접 저장하는 방식이며, 최종 색상은 이러한 계수와 시야 방향의 함수로 계산됩니다.
+* 명시적 방사장. 명시적 방사장은 복셀 그리드 또는 점 집합과 같은 이산 공간 구조에서 빛 분포를 직접 나타냅니다 [36], [37]. 이 구조의 각 요소는 해당 위치에 대한 방사 정보(radiance information)를 저장합니다. 이를 통해 방사 데이터에 직접적이고 종종 더 빠르게 접근할 수 있지만, 메모리 사용량이 많고 해상도가 낮을 수 있습니다. 암시적 방사장과 유사하게 명시적 방사장은 다음과 같이 작성됩니다. 
+  
+  (c, σ) ← DataStructure(x, y, z, θ, ϕ), (2) 
+  
+  여기서 DataStructure는 볼륨, 포인트 클라우드 등의 형식일 수 있습니다. DataStructure는 방향 색상을 두 가지 주요 방식으로 인코딩합니다. 하나는 고차원 특징을 인코딩하여 나중에 경량 MLP에 의해 디코딩되는 방식입니다. 다른 하나는 구면 조화 함수(spherical harmonics) 또는 구면 가우시안(spherical Gaussians)과 같은 방향 기저 함수의 계수를 직접 저장하는 방식이며, 최종 색상은 이러한 계수와 시야 방향의 함수로 계산됩니다.
 
 * 3D 가우시안 스플래팅: 두 세계의 최고. 3D GS [10]는 암시적 방사장의 장점을 가진 명시적 방사장입니다. 구체적으로, DataStructure의 기본 요소로 학습 가능한 3D 가우시안을 활용하여 두 패러다임의 강점을 활용합니다. 3D GS는 밀도 σ를 먼저 설정한 다음 해당 밀도를 기반으로 불투명도를 계산하는 접근 방식과 달리 각 가우시안에 대해 불투명도 α를 직접 인코딩합니다. 이전 재구성 작업에서와 같이 3D 가우시안은 다중 뷰 이미지의 감독 하에 장면을 표현하도록 최적화됩니다. 이러한 3D 가우시안 기반 미분 가능 파이프라인은 신경망 기반 최적화와 명시적, 구조화된 데이터 저장의 이점을 결합합니다. 이 하이브리드 접근 방식은 실시간, 고품질 렌더링을 달성하고 특히 복잡한 장면 및 고해상도 출력에 대해 더 적은 훈련 시간을 필요로 합니다.
 
 ### 2.2 맥락 및 용어
-* 볼륨 렌더링은 카메라 광선을 따라 방사선을 통합하여 3D 볼륨 표현을 이미지로 변환하는 것을 목표로 합니다. 카메라 광선 $r(t)$는 $r(t) = o+td, t \in [t_{near}, t_{far}]$로 매개변수화할 수 있습니다. 여기서 $o$는 광선 원점(카메라 중심), $d$는 광선 방향, $t$는 근접 및 원거리 클리핑 평면 사이의 광선 거리를 나타냅니다. 픽셀 색상 $C(r)$은 광선 $r(t)$를 따라 선 적분을 통해 계산되며, 수학적으로 다음과 같이 표현됩니다 [12]: $C(r) = \int_{t_{near}}^{t_{far}} T(t) \sigma(r(t)) c(r(t), d) dt$, (3) 여기서 $\sigma(r(t))$는 점 $r(t)$에서의 볼륨 밀도이고, $c(r(t), d)$는 해당 점에서의 색상이며, $T(t)$는 투과율입니다. 레이 마칭은 광선을 따라 체계적으로 "단계별로" 이동하고 이산 간격으로 장면의 속성을 샘플링하여 볼륨 렌더링 적분을 직접 근사합니다. NeRF [12]는 레이 마칭과 동일한 정신을 공유하며 합성 이미지의 품질을 향상시키기 위해 중요 샘플링 및 위치 인코딩을 도입합니다. 고품질 결과를 제공하지만, 레이 마칭은 특히 고해상도 이미지의 경우 계산 비용이 많이 듭니다.
+* 볼륨 렌더링은 카메라 광선을 따라 방사선을 통합하여 3D 볼륨 표현을 이미지로 변환하는 것을 목표로 합니다. 카메라 광선 $r(t)$는 $r(t) = o+td, t \in [t_{near}, t_{far}]$로 매개변수화할 수 있습니다. 여기서 $o$는 광선 원점(카메라 중심), $d$는 광선 방향, $t$는 근접 및 원거리 클리핑 평면 사이의 광선 거리를 나타냅니다. 픽셀 색상 $C(r)$은 광선 $r(t)$를 따라 선 적분을 통해 계산되며, 수학적으로 다음과 같이 표현됩니다 [12]: 
+  
+  $C(r) = \int_{t_{near}}^{t_{far}} T(t) \sigma(r(t)) c(r(t), d) dt$, (3) 
+  
+  여기서 $\sigma(r(t))$는 점 $r(t)$에서의 볼륨 밀도이고, $c(r(t), d)$는 해당 점에서의 색상이며, $T(t)$는 투과율입니다. 레이 마칭은 광선을 따라 체계적으로 "단계별로" 이동하고 이산 간격으로 장면의 속성을 샘플링하여 볼륨 렌더링 적분을 직접 근사합니다. NeRF [12]는 레이 마칭과 동일한 정신을 공유하며 합성 이미지의 품질을 향상시키기 위해 중요 샘플링 및 위치 인코딩을 도입합니다. 고품질 결과를 제공하지만, 레이 마칭은 특히 고해상도 이미지의 경우 계산 비용이 많이 듭니다.
 
 * 점 기반 렌더링은 또 다른 종류의 렌더링 알고리즘을 나타내며, 3D GS는 주목할 만한 구현을 도입합니다. 가장 간단한 형태 [38]는 고정된 크기로 포인트 클라우드를 래스터화하는데, 이는 구멍 및 렌더링 아티팩트와 같은 단점을 야기합니다. 선구적인 연구들은 다음과 같은 다양한 방법을 통해 이러한 한계를 해결했습니다. i) 공간적 범위 [14], [15], [39], [40]를 가진 점 프리미티브를 스플래팅하고, ii) 최근에는 후속 네트워크 기반 렌더링 [41], [42]을 위해 신경 특징을 점에 직접 임베딩하는 방식입니다. 3D GS는 암시적 신경 특징 대신 명시적 속성(예: 색상 및 불투명도)을 포함하는 3D 가우시안을 점 프리미티브로 사용합니다. 렌더링 접근 방식, 즉 점 기반 알파 블렌딩(식 5에 예시)은 NeRF 스타일 볼륨 렌더링(식 3)과 동일한 이미지 형성 모델 [10]을 공유하지만, 상당한 속도 이점을 보여줍니다. 이러한 이점은 근본적인 알고리즘적 차이에서 비롯됩니다. NeRF는 각 픽셀에 대한 광선을 따라 선 적분을 근사하며, 값비싼 샘플링이 필요합니다. 점 기반 방법은 래스터화를 사용하여 포인트 클라우드를 렌더링하며, 이는 본질적으로 병렬 계산 전략 [43]의 이점을 얻습니다.
 
@@ -53,23 +65,37 @@ Figure 2: Structure of the overall review.
 
 * 절두체 컬링(Frustum Culling). 지정된 카메라 포즈가 주어지면, 이 단계는 카메라 절두체(frustum) 밖에 있는 3D 가우시안을 결정합니다. 이렇게 함으로써 주어진 시점 밖에 있는 3D 가우시안은 후속 계산에 관여하지 않습니다.
 
-* 스플래팅(Splatting). 이 단계에서는 3D 공간의 3D 가우시안(타원체)이 2D 이미지 공간(타원)으로 투영됩니다. 투영은 두 가지 변환을 통해 진행됩니다. 첫째, 시점 변환을 사용하여 3D 가우시안을 월드 좌표에서 카메라 좌표로 변환하고, 그 다음 투영 변환의 근사를 통해 이 가우시안을 2D 이미지 공간으로 스플래팅합니다. 수학적으로, 3D 가우시안의 공간 분포를 설명하는 3D 공분산 행렬 $\Sigma$와 시점 변환 행렬 $W$가 주어지면, 투영된 2D 가우시안을 특징짓는 2D 공분산 행렬 $\Sigma'$는 다음을 통해 계산됩니다. $\Sigma' = J W \Sigma W^\top J^\top$, (4) 여기서 $J$는 투영 변환의 아핀 근사 [10], [39]의 자코비 행렬입니다. 왜 표준 카메라 내재(intrinsics) 기반 투영 변환이 여기에 사용되지 않는지 의아할 수 있습니다. 이는 그 매핑이 아핀이 아니므로 $\Sigma$를 직접 투영할 수 없기 때문입니다. 3D GS는 테일러 전개의 처음 두 항(J 포함)을 사용하여 투영 변환을 근사하는 [39]에서 제안된 아핀 변환을 채택합니다 ( [39]의 4.4절 참조).
+* 스플래팅(Splatting). 이 단계에서는 3D 공간의 3D 가우시안(타원체)이 2D 이미지 공간(타원)으로 투영됩니다. 투영은 두 가지 변환을 통해 진행됩니다. 첫째, 시점 변환을 사용하여 3D 가우시안을 월드 좌표에서 카메라 좌표로 변환하고, 그 다음 투영 변환의 근사를 통해 이 가우시안을 2D 이미지 공간으로 스플래팅합니다. 수학적으로, 3D 가우시안의 공간 분포를 설명하는 3D 공분산 행렬 $\Sigma$와 시점 변환 행렬 $W$가 주어지면, 투영된 2D 가우시안을 특징짓는 2D 공분산 행렬 $\Sigma'$는 다음을 통해 계산됩니다. 
+  
+  $\Sigma' = J W \Sigma W^\top J^\top$, (4) 
+  
+  여기서 $J$는 투영 변환의 아핀 근사 [10], [39]의 자코비 행렬입니다. 왜 표준 카메라 내재(intrinsics) 기반 투영 변환이 여기에 사용되지 않는지 의아할 수 있습니다. 이는 그 매핑이 아핀이 아니므로 $\Sigma$를 직접 투영할 수 없기 때문입니다. 3D GS는 테일러 전개의 처음 두 항(J 포함)을 사용하여 투영 변환을 근사하는 [39]에서 제안된 아핀 변환을 채택합니다 ( [39]의 4.4절 참조).
 
 ![](./figure/3.png)
 
 Figure 3:  NeRFs _vs_. 3D GS. (a) NeRF samples along the ray and then queries the MLP to obtain corresponding colors and densities, which can be seen as a _backward_ mapping (ray tracing). (b) In contrast, 3D GS projects all 3D Gaussians into the image space (_i.e_., splatting) and then performs parallel rendering, which can be viewed as a _forward_ mapping (rasterization). Best viewed in color.
 
-![](./figure/4.png)
-
-Figure 4: An illustration of the forward process of 3D GS (see Sec. [3.1](https://arxiv.org/html/2401.03890v6#S3.SS1 "3.1 Rendering with Learned 3D Gaussians ‣ 3 3D Gaussian Splatting: Principles ‣ A Survey on 3D Gaussian Splatting")). (a) The splatting step projects 3D Gaussians into image space. (b) 3D GS divides the image into multiple non-overlapping patches, _i.e_., tiles. (c) 3D GS replicates the Gaussians which cover several tiles, assigning each copy an identifier, _i.e_., a tile ID. (d) By rendering the sorted Gaussians, we can obtain all pixels within the tile. Note that the computational workflows for pixels and tiles are independent and can be done in parallel. Best viewed in color.
-
-* 픽셀별 렌더링. 병렬 계산을 향상시키기 위해 여러 기술을 활용하는 3D GS의 최종 버전으로 들어가기 전에, 기본 작동 메커니즘에 대한 통찰력을 제공하기 위해 더 간단한 형태를 먼저 자세히 설명합니다. 픽셀 x의 위치가 주어지면, 모든 겹치는 가우시안에 대한 거리, 즉 이 가우시안의 깊이는 시야 변환 행렬 W를 통해 계산될 수 있으며, 정렬된 가우시안 목록 N을 형성합니다. 그런 다음, 이 픽셀의 최종 색상을 계산하기 위해 알파 블렌딩이 채택됩니다. $C = \sum_{n=1}^{|N|} c_n \alpha'_n \prod_{j=1}^{n-1} (1 - \alpha'_j)$ (5), 여기서 $c_n$은 학습된 색상입니다. 최종 불투명도 $\alpha'_n$은 학습된 불투명도 $\alpha_n$과 가우시안의 곱셈 결과이며, 다음과 같이 정의됩니다. $\alpha'_n = \alpha_n \times \exp \left( -\frac{1}{2} (x' - \mu'_n)^\top \Sigma'^{-1}_n (x' - \mu'_n) \right)$ (6), 여기서 $x'$ 및 $\mu'_n$은 투영된 공간의 좌표입니다. 필요한 정렬된 목록을 생성하는 것이 병렬화하기 어렵다는 점을 고려할 때, 설명된 렌더링 프로세스가 NeRF보다 느릴 수 있다는 합리적인 우려가 있습니다. 실제로 이러한 우려는 정당합니다. 이러한 단순한 픽셀별 접근 방식을 활용할 때 렌더링 속도가 크게 영향을 받을 수 있습니다. 실시간 렌더링을 달성하기 위해 3D GS는 병렬 계산을 수용하기 위해 여러 가지 양보를 합니다.
+* 픽셀별 렌더링. 병렬 계산을 향상시키기 위해 여러 기술을 활용하는 3D GS의 최종 버전으로 들어가기 전에, 기본 작동 메커니즘에 대한 통찰력을 제공하기 위해 더 간단한 형태를 먼저 자세히 설명합니다. 픽셀 x의 위치가 주어지면, 모든 겹치는 가우시안에 대한 거리, 즉 이 가우시안의 깊이는 시야 변환 행렬 W를 통해 계산될 수 있으며, 정렬된 가우시안 목록 N을 형성합니다. 그런 다음, 이 픽셀의 최종 색상을 계산하기 위해 알파 블렌딩이 채택됩니다. 
+  
+  $C = \sum_{n=1}^{|N|} c_n \alpha'_n \prod_{j=1}^{n-1} (1 - \alpha'_j)$ (5), 
+  
+  여기서 $c_n$은 학습된 색상입니다. 최종 불투명도 $\alpha'_n$은 학습된 불투명도 $\alpha_n$과 가우시안의 곱셈 결과이며, 다음과 같이 정의됩니다. 
+  
+  $\alpha'_n = \alpha_n \times \exp \left( -\frac{1}{2} (x' - \mu'_n)^\top \Sigma'^{-1}_n (x' - \mu'_n) \right)$ (6), 
+  
+  여기서 $x'$ 및 $\mu'_n$은 투영된 공간의 좌표입니다. 필요한 정렬된 목록을 생성하는 것이 병렬화하기 어렵다는 점을 고려할 때, 설명된 렌더링 프로세스가 NeRF보다 느릴 수 있다는 합리적인 우려가 있습니다. 실제로 이러한 우려는 정당합니다. 이러한 단순한 픽셀별 접근 방식을 활용할 때 렌더링 속도가 크게 영향을 받을 수 있습니다. 실시간 렌더링을 달성하기 위해 3D GS는 병렬 계산을 수용하기 위해 여러 가지 양보를 합니다.
 
 * 타일(패치). 각 픽셀에 대한 가우시안을 유도하는 계산 비용을 피하기 위해 3D GS는 타일 기반 래스터화 [43]에서 영감을 받아 픽셀 수준에서 패치 수준 세부 정보로 정밀도를 이동합니다. 구체적으로, 3D GS는 처음에 이미지를 여러 개의 겹치지 않는 패치(타일)로 나눕니다. 그림 4b는 타일의 그림을 제공합니다. 각 타일은 [10]에서 제안한 대로 16x16 픽셀로 구성됩니다. 3D GS는 이러한 투영된 가우시안과 어떤 타일이 교차하는지 추가로 결정합니다. 투영된 가우시안이 여러 타일을 덮을 수 있다는 점을 고려할 때, 논리적인 방법은 가우시안을 복제하고 각 복사본에 관련 타일에 대한 식별자(즉, 타일 ID)를 할당하는 것입니다.
 
 * 병렬 렌더링. 복제 후, 3D GS는 각 가우시안에 대한 뷰 변환에서 얻은 깊이 값과 해당 타일 ID를 결합합니다. 이로 인해 상위 비트는 타일 ID를 나타내고 하위 비트는 깊이를 나타내는 정렬되지 않은 바이트 목록이 생성됩니다. 이렇게 함으로써 정렬된 목록은 렌더링(즉, 알파 합성)에 직접 활용될 수 있습니다. 그림 4c 및 그림 4d는 이러한 개념에 대한 시각적 시연을 제공합니다. 각 타일과 픽셀의 렌더링이 독립적으로 발생하여 이 프로세스가 병렬 계산에 매우 적합하다는 점을 강조할 가치가 있습니다. 추가적인 이점은 각 타일의 픽셀이 공통 공유 메모리에 액세스하고 균일한 읽기 순서를 유지할 수 있다는 것입니다 (그림 5). 이는 알파 합성을 효율적으로 병렬 실행할 수 있게 합니다. 원본 논문 [10]의 공식 구현에서 프레임워크는 CUDA 프로그래밍 아키텍처에서 타일 및 픽셀의 처리를 각각 블록 및 스레드와 유사하게 간주합니다. 요약하자면, 3D GS는 이미지 합성 품질의 높은 기준을 유지하면서 계산 효율성을 향상시키기 위해 렌더링 중에 여러 가지 근사치를 도입합니다.
 
 ### 3.2 3D 가우시안 스플래팅의 최적화
+
+
+![](./figure/4.png)
+
+Figure 4: An illustration of the forward process of 3D GS (see Sec. [3.1](https://arxiv.org/html/2401.03890v6#S3.SS1 "3.1 Rendering with Learned 3D Gaussians ‣ 3 3D Gaussian Splatting: Principles ‣ A Survey on 3D Gaussian Splatting")). (a) The splatting step projects 3D Gaussians into image space. (b) 3D GS divides the image into multiple non-overlapping patches, _i.e_., tiles. (c) 3D GS replicates the Gaussians which cover several tiles, assigning each copy an identifier, _i.e_., a tile ID. (d) By rendering the sorted Gaussians, we can obtain all pixels within the tile. Note that the computational workflows for pixels and tiles are independent and can be done in parallel. Best viewed in color.
+
 3D GS의 핵심에는 장면의 본질을 정확하게 포착하여 자유 시점 렌더링을 용이하게 하는 풍부한 3D 가우시안 컬렉션을 구축하기 위한 최적화 절차가 있습니다. 한편으로는 3D 가우시안의 속성을 미분 가능한 래스터화를 통해 최적화하여 주어진 장면의 텍스처에 맞도록 해야 합니다. 다른 한편으로는 주어진 장면을 잘 표현할 수 있는 3D 가우시안의 수가 미리 알려져 있지 않습니다. 3.2.1절에서는 각 가우시안의 속성을 최적화하는 방법을 소개하고, 3.2.2절에서는 가우시안의 밀도를 적응적으로 제어하는 방법을 소개합니다. 두 절차는 최적화 워크플로우 내에서 상호 연동됩니다. 최적화 프로세스에 많은 수동으로 설정된 하이퍼파라미터가 있으므로 명확성을 위해 대부분의 하이퍼파라미터 표기는 생략합니다.
 
 ![](./figure/5.png)
@@ -77,9 +103,17 @@ Figure 4: An illustration of the forward process of 3D GS (see Sec. [3.1](http
 Figure 5: An illustration of the tile based parallel (at the pixel-level) rendering. All the pixels within a tile (Tile1 here) access the same ordered Gaussian list stored in a shared memory for rendering. As the system processes each Gaussian sequentially, every pixel in the tile evaluates the Gaussian’s contribution according to the distance (_i.e_., the exp term in Eq. [6](https://arxiv.org/html/2401.03890v6#S3.E6 "In 3.1 Rendering with Learned 3D Gaussians ‣ 3 3D Gaussian Splatting: Principles ‣ A Survey on 3D Gaussian Splatting")). Therefore, the rendering for a tile can be completed by iterating through the list of Gaussians just once. The computation for the red Gaussian follows a similar way and is omitted here for simplicity.
 
 ### 3.2.1 파라미터 최적화
-* 손실 함수. 이미지 합성이 완료되면 렌더링된 이미지와 실제 이미지 간의 차이를 측정할 수 있습니다. 모든 학습 가능한 매개변수는 $\ell_1$ 및 D-SSIM 손실 함수를 사용하여 확률적 경사 하강법으로 최적화됩니다. $L = (1 - \lambda)L_1 + \lambda L_{\text{D-SSIM}}$ (7), 여기서 $\lambda \in [0, 1]$은 가중치 인자입니다.
+* 손실 함수. 이미지 합성이 완료되면 렌더링된 이미지와 실제 이미지 간의 차이를 측정할 수 있습니다. 모든 학습 가능한 매개변수는 $\ell_1$ 및 D-SSIM 손실 함수를 사용하여 확률적 경사 하강법으로 최적화됩니다. 
+  
+  $L = (1 - \lambda)L_1 + \lambda L_{\text{D-SSIM}}$ (7), 
+  
+  여기서 $\lambda \in [0, 1]$은 가중치 인자입니다.
 
-* 매개변수 업데이트. 3D 가우시안의 대부분의 속성은 역전파를 통해 직접 최적화할 수 있습니다. 공분산 행렬 $\Sigma$를 직접 최적화하면 공분산 행렬과 일반적으로 관련된 물리적 해석을 따르지 않는 비양의 반정치 행렬이 발생할 수 있다는 점에 유의해야 합니다. 이 문제를 해결하기 위해 3D GS는 쿼터니언 $q$와 3D 벡터 $s$를 최적화하도록 선택합니다. 여기서 $q$와 $s$는 각각 회전과 스케일을 나타냅니다. 이 접근 방식을 통해 공분산 행렬 $\Sigma$는 다음과 같이 재구성됩니다. $\Sigma = R S S^\top R^\top$, (8) 여기서 $R$은 쿼터니언 $q$에서 파생된 회전 행렬이고, $S$는 $\text{diag}(s)$로 주어진 스케일링 행렬입니다. 보시다시피, 불투명도 $\alpha$를 얻기 위한 복잡한 계산 그래프, 즉 $q$ 및 $s \to \Sigma$, $\Sigma \to \Sigma'$, 그리고 $\Sigma' \to \alpha$가 있습니다. 자동 미분 비용을 피하기 위해 3D GS는 $q$ 및 $s$에 대한 기울기를 유도하여 최적화 중에 직접 계산합니다.
+* 매개변수 업데이트. 3D 가우시안의 대부분의 속성은 역전파를 통해 직접 최적화할 수 있습니다. 공분산 행렬 $\Sigma$를 직접 최적화하면 공분산 행렬과 일반적으로 관련된 물리적 해석을 따르지 않는 비양의 반정치 행렬이 발생할 수 있다는 점에 유의해야 합니다. 이 문제를 해결하기 위해 3D GS는 쿼터니언 $q$와 3D 벡터 $s$를 최적화하도록 선택합니다. 여기서 $q$와 $s$는 각각 회전과 스케일을 나타냅니다. 이 접근 방식을 통해 공분산 행렬 $\Sigma$는 다음과 같이 재구성됩니다. 
+  
+  $\Sigma = R S S^\top R^\top$, (8) 
+  
+  여기서 $R$은 쿼터니언 $q$에서 파생된 회전 행렬이고, $S$는 $\text{diag}(s)$로 주어진 스케일링 행렬입니다. 보시다시피, 불투명도 $\alpha$를 얻기 위한 복잡한 계산 그래프, 즉 $q$ 및 $s \to \Sigma$, $\Sigma \to \Sigma'$, 그리고 $\Sigma' \to \alpha$가 있습니다. 자동 미분 비용을 피하기 위해 3D GS는 $q$ 및 $s$에 대한 기울기를 유도하여 최적화 중에 직접 계산합니다.
 
 ### 3.2.2 밀도 제어
 * 초기화. 3D GS는 SfM 또는 무작위 초기화에서 얻은 초기 희소 점 집합으로 시작합니다. 좋은 초기화는 수렴 및 재구성 품질에 필수적입니다 [44]. 그런 다음, 점 밀집화 및 가지치기가 3D 가우시안의 밀도를 제어하는 데 사용됩니다.
